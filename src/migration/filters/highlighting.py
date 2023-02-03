@@ -12,7 +12,7 @@ class HighlightingFilter(Filter):
         self.language_mappings = language_mappings or {}
 
     def process_node(self, node):
-        pattern = "```(\w+) ({(.*)})?"
+        pattern = "``` *(\w+) *({(.*)})?"
         node.markdown_content = re.sub(pattern, self.convert_highlighting, 
                 node.markdown_content)
         return node
