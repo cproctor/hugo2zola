@@ -12,5 +12,3 @@ class ReplaceContentFilter(Filter):
         for pattern, replacement in self.replacements:
             node.markdown_content = re.sub(pattern, replacement, node.markdown_content)
         return node
-
-

@@ -34,3 +34,6 @@ any tool could provide full coverage for a migration. Instead, this tool
 provides a reproducible migration which you can iteratively tweak by 
 configuring filters, or writing new filters. 
 
+## Running tests
+
+`python -m unittest discover -s tests`

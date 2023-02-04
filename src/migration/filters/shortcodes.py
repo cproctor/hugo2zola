@@ -43,9 +43,19 @@ class ShortcodeFilter(Filter):
             if name in self.strip or name in self.delete:
                 return ""
             else:
-                return "{% " + name + self.convert_args(argstr) + " %}" 
+                return "{{ " + name + self.convert_args(argstr) + " }}" 
         node.markdown_content = re.sub(pattern_a, sub, node.markdown_content)
         node.markdown_content = re.sub(pattern_b, sub, node.markdown_content)
 
     def convert_args(self, args):
-        return "()"
+        if args:
+            arglist = args.strip().split(' ')
+            named_args = []
+            for arg in arglist:
+                if m := re.match("(?P<key>\w+)=(?P<val>.*)", arg):
+                    named_args.append([m.group('key'), m.group('val')])
+                else:
+                    named_args.append([f"arg{len(named_args)}", arg])
+            return "(" + ", ".join([key + '=' + val for key, val in named_args]) + ")"
+        else:
+            return "()"
