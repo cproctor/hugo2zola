@@ -6,6 +6,7 @@ from migration.filters.debug import DebugFilter
 from migration.filters.clean_metadata import CleanMetadataFilter
 from migration.filters.replace_content import ReplaceContentFilter
 from migration.filters.highlighting import HighlightingFilter
+from migration.filters.shortcodes import ShortcodeFilter
 from migration import Migrator
 
 parser = ArgumentParser()
@@ -19,7 +20,8 @@ args = parser.parse_args()
 migrator = Migrator([
     DebugFilter(),
     CleanMetadataFilter(['title']),
-    HighlightingFilter({'shell': 'bash', 'python3': 'py3'})
+    HighlightingFilter({'shell': 'bash', 'python3': 'py3'}),
+    ShortcodeFilter(),
 ])
 
 migrator.migrate(
