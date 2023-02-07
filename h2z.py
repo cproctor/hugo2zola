@@ -23,7 +23,9 @@ migrator = Migrator([
     CleanMetadataFilter(['title']),
     HighlightingFilter({'shell': 'bash', 'python3': 'py3'}),
     InternalLinksFilter(),
-    ShortcodeFilter(),
+    ShortcodeFilter(
+        arg_names={'youtube': ['id', 'autoplay']}
+    ),
 ])
 
 migrator.migrate(

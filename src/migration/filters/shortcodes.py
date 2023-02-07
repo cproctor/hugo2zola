@@ -3,11 +3,16 @@ from migration.filters.base import Filter
 
 class ShortcodeFilter(Filter):
     """Translates hugo's shortcode syntax to zola's, optionally stripping
-    or deleting named shortcodes.
+    or deleting named shortcodes. Optional arguments to constructor:
+    - strip: names of shortcodes to strip, leaving their bodies as content
+    - delete: names of shortcodes to delete entirely
+    - arg_names: dict like {shortcode_name: [arg_names]} specifying names
+      of args to override
     """
-    def __init__(self, strip=None, delete=None):
+    def __init__(self, strip=None, delete=None, arg_names=None):
         self.strip = strip or []
         self.delete = delete or []
+        self.arg_names = arg_names or {}
 
     def process_node(self, node):
         self.filter_shortcodes_with_bodies(node)
@@ -27,7 +32,7 @@ class ShortcodeFilter(Filter):
                 return ""
             else:
                 return (
-                    "{% " + name + self.convert_args(argstr) + " %}" + 
+                    "{% " + name + self.convert_args(name, argstr) + " %}" + 
                     body + 
                     "{% end %}"
                 )
@@ -43,19 +48,26 @@ class ShortcodeFilter(Filter):
             if name in self.strip or name in self.delete:
                 return ""
             else:
-                return "{{ " + name + self.convert_args(argstr) + " }}" 
+                return "{{ " + name + self.convert_args(name, argstr) + " }}" 
         node.markdown_content = re.sub(pattern_a, sub, node.markdown_content)
         node.markdown_content = re.sub(pattern_b, sub, node.markdown_content)
 
-    def convert_args(self, args):
-        if args:
-            arglist = args.strip().split(' ')
-            named_args = []
-            for arg in arglist:
-                if m := re.match("(?P<key>\w+)=(?P<val>.*)", arg):
-                    named_args.append([m.group('key'), m.group('val')])
-                else:
-                    named_args.append([f"arg{len(named_args)}", arg])
-            return "(" + ", ".join([key + '=' + val for key, val in named_args]) + ")"
-        else:
+    def convert_args(self, name, args):
+        if not args:
             return "()"
+
+        arglist = args.strip().split(' ')
+        named_args = []
+        for arg in arglist:
+            if m := re.match("(?P<key>\w+)=(?P<val>.*)", arg):
+                named_args.append([m.group('key'), m.group('val')])
+            else:
+                named_args.append([f"arg{len(named_args)}", arg])
+        if name in self.arg_names:
+            given_names = self.arg_names[name]
+            if len(given_names) < len(named_args):
+                msg = f"{len(given_names)} args named for shortcode {name}, but "
+                msg += f"found {len(named_args)} args: {named_args}"
+                raise ValueError(msg)
+            named_args = [[given, val] for given, (key, val) in zip(given_names, named_args)]
+        return "(" + ", ".join([key + '=' + val for key, val in named_args]) + ")"
