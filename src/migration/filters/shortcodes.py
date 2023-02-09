@@ -1,5 +1,6 @@
 import re
 from migration.filters.base import Filter
+import shlex
 
 class ShortcodeFilter(Filter):
     """Translates hugo's shortcode syntax to zola's, optionally stripping
@@ -20,8 +21,8 @@ class ShortcodeFilter(Filter):
         return node
 
     def filter_shortcodes_with_bodies(self, node):
-        pattern_a = "{{< +(?P<name>\w+)(?P<args>.*) +>}}(?P<body>.*){{< +/(?P=name) +>}}"
-        pattern_b = "{{% +(?P<name>\w+)(?P<args>.*) +%}}(?P<body>.*){{% +/(?P=name) +%}}"
+        pattern_a = "{{< +(?P<name>\w+)(?P<args>.*?) +>}}(?P<body>.*?){{< +/(?P=name) +>}}"
+        pattern_b = "{{% +(?P<name>\w+)(?P<args>.*?) +%}}(?P<body>.*?){{% +/(?P=name) +%}}"
         def sub(match):
             name = match.group("name")
             argstr = match.group("args")
@@ -40,8 +41,8 @@ class ShortcodeFilter(Filter):
         node.markdown_content = re.sub(pattern_b, sub, node.markdown_content, flags=re.DOTALL)
 
     def filter_shortcodes_without_bodies(self, node):
-        pattern_a = "{{< +(\w+)(.*) +>}}"
-        pattern_b = "{{% +(\w+)(.*) +%}}"
+        pattern_a = "{{< +(\w+)(.*?) +>}}"
+        pattern_b = "{{% +(\w+)(.*?) +%}}"
         def sub(match):
             name = match.group(1)
             argstr = match.group(2)
@@ -56,7 +57,7 @@ class ShortcodeFilter(Filter):
         if not args:
             return "()"
 
-        arglist = args.strip().split(' ')
+        arglist = shlex.split(args.strip(), posix=False)
         named_args = []
         for arg in arglist:
             if m := re.match("(?P<key>\w+)=(?P<val>.*)", arg):
