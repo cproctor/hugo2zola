@@ -24,7 +24,11 @@ migrator = Migrator([
     HighlightingFilter({'shell': 'bash', 'python3': 'py3'}),
     InternalLinksFilter(),
     ShortcodeFilter(
-        arg_names={'youtube': ['id', 'autoplay']}
+        arg_names={
+            'youtube': ['id', 'autoplay'],
+            'details': ['summary'],
+            'aside': ['title'],
+        }
     ),
 ])
 
