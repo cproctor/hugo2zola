@@ -21,8 +21,8 @@ class ShortcodeFilter(Filter):
         return node
 
     def filter_shortcodes_with_bodies(self, node):
-        pattern_a = "{{< +(?P<name>\w+)(?P<args>.*?) +>}}(?P<body>.*?){{< +/(?P=name) +>}}"
-        pattern_b = "{{% +(?P<name>\w+)(?P<args>.*?) +%}}(?P<body>.*?){{% +/(?P=name) +%}}"
+        pattern_a = "{{< *(?P<name>\w+)(?P<args>.*?) *>}}(?P<body>.*?){{< */(?P=name) *>}}"
+        pattern_b = "{{% *(?P<name>\w+)(?P<args>.*?) *%}}(?P<body>.*?){{% */(?P=name) *%}}"
         def sub(match):
             name = match.group("name")
             argstr = match.group("args")
@@ -41,8 +41,8 @@ class ShortcodeFilter(Filter):
         node.markdown_content = re.sub(pattern_b, sub, node.markdown_content, flags=re.DOTALL)
 
     def filter_shortcodes_without_bodies(self, node):
-        pattern_a = "{{< +(\w+)(.*?) +>}}"
-        pattern_b = "{{% +(\w+)(.*?) +%}}"
+        pattern_a = "{{< *(\w+)(.*?) *>}}"
+        pattern_b = "{{% *(\w+)(.*?) *%}}"
         def sub(match):
             name = match.group(1)
             argstr = match.group(2)
